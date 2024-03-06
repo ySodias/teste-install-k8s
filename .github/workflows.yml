@@ -24,7 +24,7 @@ jobs:
       - name: Build & Deploy
         env:
             PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
-            HOSTNAME: ""
+            HOSTNAME: "54.224.102.19"
             USER_NAME: "ubuntu"
             AWS_SECRET_key: ${{ secrets.AWS_SECRET_key }}
             AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
