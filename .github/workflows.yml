@@ -32,21 +32,21 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-          curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/darwin/amd64/kubectl
-          chmod +x ./kubectl
-          mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
-          echo 'export PATH=$HOME/bin:$PATH' >> ~/.bash_profile
-          kubectl version --client
+            curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/darwin/amd64/kubectl
+            chmod +x ./kubectl
+            mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+            echo 'export PATH=$HOME/bin:$PATH' >> ~/.bash_profile
+            kubectl version --client
+  
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+  
+            aws --version
+            aws configure set aws_access_key_id $AWS_SECRET_key
+            aws configure set aws_secret_access_key $AWS_ACCESS_KEY
+            aws configure set region us-east-1
+            
+            aws eks update-kubeconfig --region region-code --name my-cluster
 
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-
-          aws --version
-          aws configure set aws_access_key_id $AWS_SECRET_key
-          aws configure set aws_secret_access_key $AWS_ACCESS_KEY
-          aws configure set region us-east-1
-          
-          aws eks update-kubeconfig --region region-code --name my-cluster
-
-
+            '
