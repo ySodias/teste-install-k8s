@@ -20,18 +20,14 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v2 
-      - name: Build & Deploy
-        env:
-            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
-            HOSTNAME: "54.224.102.19"
-            USER_NAME: "ubuntu"
-            AWS_SECRET_key: ${{ secrets.AWS_SECRET_key }}
-            AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+      - name: Executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+            key: ${{ secrets.AWS_PRIVATE_KEY }}
+            host: "54.224.102.19"
+            key: "ubuntu"
       
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}
+        script: |
           curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/darwin/amd64/kubectl
           chmod +x ./kubectl
           mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
@@ -43,10 +39,10 @@ jobs:
           sudo ./aws/install
   
           aws --version
-          aws configure set aws_access_key_id $AWS_SECRET_key
-          aws configure set aws_secret_access_key $AWS_ACCESS_KEY
+          aws configure set aws_access_key_id ${{ secrets.AAWS_SECRET_key }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_ACCESS_KEY }}
           aws configure set region us-east-1
             
-          aws eks update-kubeconfig --region region-code --name my-cluster
+          aws eks update-kubeconfig --region us-east-1 --name my-cluster
 
       
