@@ -36,13 +36,11 @@ jobs:
               mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
               echo 'export PATH=$HOME/bin:$PATH' >> ~/.bash_profile
               
-      - name: Configure EKS
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: us-east-1
-            script: |
+              aws --version
+              aws configure set aws_access_key_id $AWS_SECRET_KEY
+              aws configure set aws_secret_access_key $AWS_ACCESS_KEY
+              aws configure set region us-east-1
+              
               aws sts get-caller-identity
               aws eks update-kubeconfig --region us-east-1 --name restaurant-34
 
