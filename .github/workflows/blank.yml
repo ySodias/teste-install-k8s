@@ -21,5 +21,5 @@ jobs:
           host: "52.87.247.252"
           username: "ec2-user"
           script: |
-             echo "$AWS_ACCESS_KEY_ID"
-             echo "$AWS_SECRET_ACCESS_KEY"
+             echo $AWS_ACCESS_KEY_ID
+             echo $AWS_SECRET_ACCESS_KEY
