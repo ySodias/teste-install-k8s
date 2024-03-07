@@ -27,11 +27,15 @@ jobs:
             echo "export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_KEY }}" >> ~/.bash_profile
             echo 'export AWS_DEFAULT_REGION=us-east-1' >> ~/.bash_profile
 
-      - name: Configure EKS
+      - name: Set Credentials
         uses: aws-actions/configure-aws-cli@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
+      - name: Login AWS
         run: |
-           aws eks update-kubeconfig --region us-east-1 --name restaurant-34
+          aws sts get-caller-identity
+      - name: Configure EKS
+        run: |
+            aws eks update-kubeconfig --region us-east-1 --name restaurant-34
