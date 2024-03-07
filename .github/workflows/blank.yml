@@ -11,15 +11,27 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Executing remote ssh commands using ssh key
+      - name: Install Kubernetes
         uses: appleboy/ssh-action@master
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         with:
           key: ${{ secrets.AWS_PRIVATE_KEY }}
           host: "52.87.247.252"
           username: "ec2-user"
           script: |
-             echo $AWS_ACCESS_KEY_ID
-             echo $AWS_SECRET_ACCESS_KEY
+            curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/linux/amd64/kubectl
+            chmod +x ./kubectl
+            mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+            echo 'export PATH=$HOME/bin:$PATH' >> ~/.bash_profile
+            
+            echo "export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY }}" >> ~/.bash_profile
+            echo "export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_KEY }}" >> ~/.bash_profile
+            echo 'export AWS_DEFAULT_REGION=us-east-1' >> ~/.bash_profile
+
+      - name: Configure EKS
+        uses: aws-actions/configure-aws-cli@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-1
+        run: |
+           aws eks update-kubeconfig --region us-east-1 --name restaurant-34
