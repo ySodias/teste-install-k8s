@@ -7,20 +7,21 @@ on:
 
 jobs:
   Deploy:
-    name: Deploy to EC2
+    name: Deploy to EC2 and Update Kubectl
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: Executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
         with:
-          ssh-private-key: ${{ secrets.AWS_PRIVATE_KEY }}
-
-      - name: Transfer script to EC2
-        run: scp -o StrictHostKeyChecking=no -i $ssh-private-key scripts/install_kubernetes.sh ec2-user@52.87.247.252:/tmp/
-  
-      - name: Execute script on EC2
-        run: ssh -o StrictHostKeyChecking=no -i $ssh-private-key ec2-user@52.87.247.252 'bash /tmp/install_kubernetes.sh'
+          key: ${{ secrets.AWS_PRIVATE_KEY }}
+          host: "52.87.247.252"
+          username: "ec2-user"
+          script: |
+            echo "AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY"
+            curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/linux/amd64/kubectl
+            chmod +x ./kubectl
+            mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+            echo 'export PATH=$HOME/bin:$PATH' >> ~/.bash_profile
+            
+            aws eks update-kubeconfig --region us-east-1 --name restaurant-34
