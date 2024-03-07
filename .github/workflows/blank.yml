@@ -11,31 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Install Kubernetes
-        uses: appleboy/ssh-action@master
-        with:
-          key: ${{ secrets.AWS_PRIVATE_KEY }}
-          host: "52.87.247.252"
-          username: "ec2-user"
-          script: |
-            curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/linux/amd64/kubectl
-            chmod +x ./kubectl
-            mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
-            echo 'export PATH=$HOME/bin:$PATH' >> ~/.bash_profile
-            
-            echo "export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY }}" >> ~/.bash_profile
-            echo "export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_KEY }}" >> ~/.bash_profile
-            echo 'export AWS_DEFAULT_REGION=us-east-1' >> ~/.bash_profile
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Set Credentials
-        uses: aws-actions/configure-aws-cli@v4
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.5.3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-          aws-region: us-east-1
-      - name: Login AWS
-        run: |
-          aws sts get-caller-identity
-      - name: Configure EKS
-        run: |
-            aws eks update-kubeconfig --region us-east-1 --name restaurant-34
+          ssh-private-key: ${{ secrets.AWS_PRIVATE_KEY }}
+
+      - name: Transfer script to EC2
+        run: scp -o StrictHostKeyChecking=no -i ${{ secrets.AWS_PRIVATE_KEY }} install_kubernetes.sh ec2-user@52.87.247.252:/tmp/
+  
+      - name: Execute script on EC2
+        run: ssh -o StrictHostKeyChecking=no -i ${{ secrets.AWS_PRIVATE_KEY }} ec2-user@52.87.247.252 'bash /tmp/install_kubernetes.sh'
