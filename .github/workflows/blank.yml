@@ -26,19 +26,11 @@ jobs:
           instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=kubectl" --query "Reservations[].Instances[].InstanceId" --output text)
           echo "::set-output name=instance_id::$instance_id"
   
-      - name: Get EC2 instance information
+      - name: Get EC2 instance host
         id: ec2-info
         run: |
-          instance_info=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=kubectl" --query "Reservations[].Instances[].PublicIpAddress" --output text)
-          echo "::set-output name=instance_info::$instance_info"
-
-      - name: Extract host from instance information
-        id: extract-host
-        run: |
-          instance_info="${{ steps.ec2-info.outputs.instance_info }}"
-          echo "instance_info ->> $instance_info"
-          host=$(echo "$instance_info" | jq -r '.Reservations[0].Instances[0].PublicIpAddress')
-          echo "::set-output name=host::$host"
+          instance_host=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=kubectl" --query "Reservations[].Instances[].PublicIpAddress" --output text)
+          echo "::set-output name=instance_info::$instance_host"
           
       - name: Apply role to EC2 instance
         run: |
@@ -49,7 +41,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           key: ${{ secrets.AWS_PRIVATE_KEY }}
-          host: $host
+          host: $instance_host
           username: "ec2-user"
           script: |
             echo "AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY"
