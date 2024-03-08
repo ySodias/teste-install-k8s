@@ -19,7 +19,12 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-          aws-region: us-east-1                                                                                                    
+          aws-region: us-east-1 
+      - name: Get EC2 instance ID by name
+        id: get-instance-id
+        run: |
+          instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=your-instance-name" --query "Reservations[].Instances[].InstanceId" --output text)
+          echo "::set-output name=instance_id::$instance_id"
   
       - name: Get EC2 instance information
         id: ec2-info
@@ -30,7 +35,8 @@ jobs:
       - name: Extract host from instance information
         id: extract-host
         run: |
-          host=$(echo "${{ steps.ec2-info.outputs.instance_info }}" | jq -r '.Reservations[0].Instances[0].PublicIpAddress')
+          instance_info="${{ steps.ec2-info.outputs.instance_info }}"
+          host=$(echo "$instance_info" | jq -r '.Reservations[0].Instances[0].PublicIpAddress')
           echo "::set-output name=host::$host"
           
       - name: Apply role to EC2 instance
