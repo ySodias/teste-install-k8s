@@ -36,6 +36,7 @@ jobs:
         id: extract-host
         run: |
           instance_info="${{ steps.ec2-info.outputs.instance_info }}"
+          echo "instance_info ->> $instance_info"
           host=$(echo "$instance_info" | jq -r '.Reservations[0].Instances[0].PublicIpAddress')
           echo "::set-output name=host::$host"
           
