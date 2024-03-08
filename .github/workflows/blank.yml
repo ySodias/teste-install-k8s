@@ -32,7 +32,7 @@ jobs:
         run: |
           host=$(echo "${{ steps.ec2-info.outputs.instance_info }}" | jq -r '.Reservations[0].Instances[0].PublicIpAddress')
           echo "::set-output name=host::$host"
-  
+          
       - name: Apply role to EC2 instance
         run: |
           instance_id="${{ steps.get-instance-id.outputs.instance_id }}"
