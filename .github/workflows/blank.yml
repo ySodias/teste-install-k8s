@@ -11,6 +11,27 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-1                                                                                                    
+  
+      - name: Get EC2 instance ID by name
+        id: get-instance-id
+        run: |
+          instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=kubectl" --query "Reservations[].Instances[].InstanceId" --output text)
+          echo "::set-output name=instance_id::$instance_id"
+  
+      - name: Apply role to EC2 instance
+        run: |
+          instance_id="${{ steps.get-instance-id.outputs.instance_id }}"
+          aws ec2 associate-iam-instance-profile --iam-instance-profile Name=ed-eks-worker-new-profile --instance-id $instance_id
+      
       - name: Executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
         with:
