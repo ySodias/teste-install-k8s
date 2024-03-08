@@ -15,7 +15,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           key: ${{ secrets.AWS_PRIVATE_KEY }}
-          host: "52.87.247.252"
+          host: "18.206.251.243"
           username: "ec2-user"
           script: |
             echo "AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY"
