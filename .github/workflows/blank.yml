@@ -23,13 +23,13 @@ jobs:
       - name: Get EC2 instance ID by name
         id: get-instance-id
         run: |
-          instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=your-instance-name" --query "Reservations[].Instances[].InstanceId" --output text)
+          instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=kubectl" --query "Reservations[].Instances[].InstanceId" --output text)
           echo "::set-output name=instance_id::$instance_id"
   
       - name: Get EC2 instance information
         id: ec2-info
         run: |
-          instance_info=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=your-instance-name")
+          instance_info=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=kubectl" --query "Reservations[].Instances[].PublicIpAddress" --output text)
           echo "::set-output name=instance_info::$instance_info"
 
       - name: Extract host from instance information
