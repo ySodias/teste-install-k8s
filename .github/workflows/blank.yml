@@ -21,18 +21,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1                                                                                                    
   
-      - name: Get EC2 instance ID by name
-        id: get-instance-id
+      - name: Get EC2 instance information
+        id: ec2-info
         run: |
-          instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=kubectl" --query "Reservations[].Instances[].InstanceId" --output text)
-          echo "::set-output name=instance_id::$instance_id"
-          
+          instance_info=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=your-instance-name")
+          echo "::set-output name=instance_info::$instance_info"
+
       - name: Extract host from instance information
         id: extract-host
         run: |
-          # Assuming you want to extract the public IP address
           host=$(echo "${{ steps.ec2-info.outputs.instance_info }}" | jq -r '.Reservations[0].Instances[0].PublicIpAddress')
-          echo "::set-output name=host::$host
+          echo "::set-output name=host::$host"
   
       - name: Apply role to EC2 instance
         run: |
