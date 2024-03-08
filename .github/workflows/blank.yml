@@ -26,6 +26,13 @@ jobs:
         run: |
           instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=kubectl" --query "Reservations[].Instances[].InstanceId" --output text)
           echo "::set-output name=instance_id::$instance_id"
+          
+      - name: Extract host from instance information
+        id: extract-host
+        run: |
+          # Assuming you want to extract the public IP address
+          host=$(echo "${{ steps.ec2-info.outputs.instance_info }}" | jq -r '.Reservations[0].Instances[0].PublicIpAddress')
+          echo "::set-output name=host::$host
   
       - name: Apply role to EC2 instance
         run: |
@@ -36,7 +43,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           key: ${{ secrets.AWS_PRIVATE_KEY }}
-          host: "18.207.215.116"
+          host: $host
           username: "ec2-user"
           script: |
             echo "AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY"
